@@ -1,0 +1,68 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #0f1115;
+  color: #eaeaea;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #4ea1ff;
+}
+
+nav a {
+  margin-right: 15px;
+  color: #4ea1ff;
+  text-decoration: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border-bottom: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #161a22;
+}
+
+td.earnings {
+  color: #00ff7f;
+}
+
+td.loss {
+  color: #ff4c4c;
+}
+
+/* Confirm Box Styles */
+.confirmBox {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  color: #fff;
+  padding: 20px;
+  border: 2px solid #4ea1ff;
+  z-index: 1000;
+  text-align: center;
+}
+.confirmBox button {
+  margin: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border: none;
+  background: #4ea1ff;
+  color: #fff;
+  font-weight: bold;
+}
+.confirmBox button:hover {
+  background: #2e7ddb;
+}
