@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Final-Rank-Elite Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Final-Rank-Elite Admin Leaderboard</h1>
+
+<nav>
+  <a href="tutorial.html">Rules Tutorial</a>
+  <a href="history.html">Tournament History</a>
+</nav>
+
+<!-- Copy JSON Button -->
+<button id="copyJsonBtn">Copy JSON</button>
+
+<table id="leaderboard">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Username</th>
+      <th>Games CM</th>
+      <th>Games ST</th>
+      <th>CM $</th>
+      <th>ST $</th>
+      <th>Total $</th>
+      <th>Winrate CM</th>
+      <th>Winrate ST</th>
+      <th>Reset Earnings</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script src="config.js"></script>
+<script src="ledger.js"></script>
+<script src="lichess.js"></script>
+<script src="calc.js"></script>
+<script>
+async function renderLeaderboard() {
+  const teamMembers = await Lichess.fetchTeamMembers();
+  const tournaments = await Lichess.fetchTeamTournaments(CONFIG.manualTournamentIDs);
+  const results = await Lichess.fetchTournamentResults(tournaments);
+
+  const payouts = Calc.calculatePayouts(teamMembers, results, ledger);
+
+  const tbody = document.querySelector("#leaderboard tbody");
+  tbody.innerHTML = "";
+
+  payouts.forEach((player, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${player.username}</td>
+      <td>${player.gamesCM}</td>
+      <td>${player.gamesST}</td>
+      <td class="earnings">$${player.earningsCM.toFixed(2)}</td>
+      <td class="earnings">$${player.earningsST.toFixed(2)}</td>
+      <td class="earnings">$${player.totalEarnings.toFixed(2)}</td>
+      <td>${(player.winrateCM*100).toFixed(1)}%</td>
+      <td>${(player.winrateST*100).toFixed(1)}%</td>
+      <td>
+        <button onclick="confirmClear('${player.username}','chessMood')">Reset CM</button>
+        <button onclick="confirmClear('${player.username}','streamers')">Reset ST</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  window.lastLeaderboardJSON = JSON.stringify(payouts, null, 2);
+}
+
+// Initial render
+renderLeaderboard();
+
+// Copy JSON Button
+document.getElementById("copyJsonBtn").addEventListener("click", () => {
+  if (window.lastLeaderboardJSON) {
+    navigator.clipboard.writeText(window.lastLeaderboardJSON)
+      .then(() => alert("Leaderboard JSON copied to clipboard!"))
+      .catch(err => alert("Failed to copy JSON: " + err));
+  } else {
+    alert("Leaderboard not ready yet.");
+  }
+});
+
+// Confirm / Cancel Clear Button
+function confirmClear(username, type) {
+  const confirmDiv = document.createElement("div");
+  confirmDiv.className = "confirmBox";
+  confirmDiv.innerHTML = `
+    <p>Are you sure you want to clear ${username}'s ${type === "chessMood" ? "ChessMood" : "Streamers"} earnings?</p>
+    <button id="confirmBtn">Confirm</button>
+    <button id="cancelBtn">Cancel</button>
+  `;
+  document.body.appendChild(confirmDiv);
+
+  document.getElementById("confirmBtn").onclick = () => {
+    ledger.resetEarnings(username, type);
+    document.body.removeChild(confirmDiv);
+    renderLeaderboard();
+  };
+
+  document.getElementById("cancelBtn").onclick = () => {
+    document.body.removeChild(confirmDiv);
+  };
+}
+</script>
+</body>
+</html>
